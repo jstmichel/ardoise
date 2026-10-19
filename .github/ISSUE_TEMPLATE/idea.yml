@@ -1,0 +1,29 @@
+name: Idea
+description: A new component, state or token to discuss before any code.
+labels: [idea]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ardoise keeps a small, application-independent API: a component joins when it adds
+        shared behavior, metrics or painting that several applications need. See
+        [CONTRIBUTING.md](https://github.com/jstmichel/ardoise/blob/main/CONTRIBUTING.md).
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: What the component or change does, and how an application would use it.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The problem it solves, and why it belongs in a shared library rather than in one application.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: How we would know it works
+      description: Observable results, for example keyboard behavior, states or a gallery screenshot.

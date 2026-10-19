@@ -1,0 +1,44 @@
+name: Bug
+description: A component or the theme does not behave as the documentation says.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead. A screenshot helps for visual issues.
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Smallest code that shows it
+      description: A few lines using Ardoise, or the gallery steps that show the issue.
+      render: cpp
+  - type: input
+    id: version
+    attributes:
+      label: Ardoise version
+      description: "`Ardoise::version()`, or the tag or commit you build from"
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: qt
+    attributes:
+      label: Qt version and compiler
+      placeholder: "Qt 6.8.3, MSVC 2022"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Linux (X11)
+        - Linux (Wayland)
+        - macOS
+        - Windows
+        - Build or CMake integration
+    validations:
+      required: true

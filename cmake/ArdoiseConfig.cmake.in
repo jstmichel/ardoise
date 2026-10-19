@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Qt6 6.2 COMPONENTS Widgets Svg)
+
+include("${CMAKE_CURRENT_LIST_DIR}/ArdoiseTargets.cmake")
+check_required_components(Ardoise)

@@ -1,0 +1,82 @@
+set(test_root "@CMAKE_CURRENT_BINARY_DIR@/${MODE}-consumer")
+file(REMOVE_RECURSE "${test_root}")
+file(MAKE_DIRECTORY "${test_root}")
+
+if(NOT CONFIG)
+    set(CONFIG Debug)
+endif()
+
+set(source_checkout "")
+set(package_prefix "")
+
+if(MODE STREQUAL "installed")
+    execute_process(
+        COMMAND "@CMAKE_COMMAND@" --install "@PROJECT_BINARY_DIR@"
+            --prefix "${test_root}/original-prefix" --config "${CONFIG}"
+        RESULT_VARIABLE result
+    )
+    if(NOT result EQUAL 0)
+        message(FATAL_ERROR "Framework installation failed: ${result}")
+    endif()
+
+    # The consumer must work after the package is moved from its installation path.
+    set(package_prefix "${test_root}/relocated-prefix")
+    file(RENAME "${test_root}/original-prefix" "${package_prefix}")
+elseif(MODE STREQUAL "source")
+    set(source_checkout "@PROJECT_SOURCE_DIR@")
+else()
+    message(FATAL_ERROR "Unknown consumer test mode: ${MODE}")
+endif()
+
+set(generator_options)
+if(NOT "@CMAKE_GENERATOR_PLATFORM@" STREQUAL "")
+    list(APPEND generator_options -A "@CMAKE_GENERATOR_PLATFORM@")
+endif()
+if(NOT "@CMAKE_GENERATOR_TOOLSET@" STREQUAL "")
+    list(APPEND generator_options -T "@CMAKE_GENERATOR_TOOLSET@")
+endif()
+
+if(MODE STREQUAL "source")
+    set(integration_options "-DARDOISE_SOURCE_DIR:PATH=${source_checkout}")
+else()
+    set(integration_options "-DArdoise_ROOT:PATH=${package_prefix}")
+endif()
+
+execute_process(
+    COMMAND "@CMAKE_COMMAND@"
+        -S "@PROJECT_SOURCE_DIR@/examples/consumer"
+        -B "${test_root}/build"
+        -G "@CMAKE_GENERATOR@" ${generator_options}
+        "-DCMAKE_CXX_COMPILER:FILEPATH=@CMAKE_CXX_COMPILER@"
+        "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=@CMAKE_TOOLCHAIN_FILE@"
+        "-DCMAKE_PREFIX_PATH:STRING=@CMAKE_PREFIX_PATH@"
+        "-DQt6_DIR:PATH=@Qt6_DIR@"
+        "-DCMAKE_BUILD_TYPE:STRING=${CONFIG}"
+        ${integration_options}
+    RESULT_VARIABLE result
+)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Consumer configuration failed: ${result}")
+endif()
+
+execute_process(
+    COMMAND "@CMAKE_COMMAND@" --build "${test_root}/build" --config "${CONFIG}"
+    RESULT_VARIABLE result
+)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Consumer build failed: ${result}")
+endif()
+
+set(executable "${test_root}/build/ardoise-consumer@CMAKE_EXECUTABLE_SUFFIX@")
+if(EXISTS "${test_root}/build/${CONFIG}/ardoise-consumer@CMAKE_EXECUTABLE_SUFFIX@")
+    set(executable "${test_root}/build/${CONFIG}/ardoise-consumer@CMAKE_EXECUTABLE_SUFFIX@")
+endif()
+
+execute_process(COMMAND "@CMAKE_COMMAND@" -E env "QT_QPA_PLATFORM=offscreen" "${executable}" RESULT_VARIABLE result OUTPUT_VARIABLE output)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Consumer execution failed: ${result}")
+endif()
+string(STRIP "${output}" output)
+if(NOT output STREQUAL "Ardoise @PROJECT_VERSION@")
+    message(FATAL_ERROR "Unexpected consumer output: ${output}")
+endif()
