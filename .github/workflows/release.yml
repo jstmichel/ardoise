@@ -1,6 +1,6 @@
 # On a version tag, checks that the tag matches the CMake project version, builds and tests
-# the tagged source, then attaches the source archive and its checksum to a draft release,
-# which the maintainer publishes.
+# the tagged source, then attaches the source archive, the get-ardoise.sh installer and their
+# checksums to a draft release, which the maintainer publishes.
 name: Release
 
 on:
@@ -50,12 +50,14 @@ jobs:
           cmake --build build
           ctest --test-dir build --output-on-failure
 
-      - name: Source archive and checksum
+      - name: Source archive, installer and checksums
         run: |
           mkdir -p dist
           git archive --format=tar.gz --prefix="ardoise-$VERSION/" -o "dist/ardoise-$VERSION.tar.gz" "$TAG"
+          # The one-command installer, served by releases/latest/download/.
+          cp scripts/get-ardoise.sh dist/
           cd dist
-          sha256sum ardoise-* > SHA256SUMS
+          sha256sum ardoise-* get-ardoise.sh > SHA256SUMS
           cat SHA256SUMS
 
       - name: Draft the release

@@ -16,6 +16,12 @@ if(ARDOISE_INSTALL)
     )
 endif()
 
+# The installer is a POSIX shell script for Linux and macOS.
+if(UNIX)
+    add_test(NAME ardoise-get-ardoise
+        COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/GetArdoise.sh" "${PROJECT_SOURCE_DIR}/scripts/get-ardoise.sh")
+endif()
+
 find_package(Qt6 6.2 REQUIRED COMPONENTS Test)
 add_executable(ardoise-theme-test ThemeTest.cpp)
 set_target_properties(ardoise-theme-test PROPERTIES AUTOMOC ON)

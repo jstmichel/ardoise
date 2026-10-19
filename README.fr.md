@@ -97,22 +97,46 @@ d'installation.
 
 ### Paquet installé
 
-Installez Ardoise une fois, puis trouvez-la comme tout paquet CMake :
+Sous Linux et macOS, une seule commande télécharge la dernière version, la vérifie avec
+le `SHA256SUMS` de la release, la compile et l'installe dans `~/.local` :
 
 ```sh
-cmake -S ardoise -B ardoise/build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build ardoise/build
-cmake --install ardoise/build --prefix "$HOME/.local/ardoise"
+curl -fsSL https://github.com/jstmichel/ardoise/releases/latest/download/get-ardoise.sh | sh
 ```
+
+Ajoutez `-s -- --version v0.1.0` après `sh` pour une version précise, `--prefix <dossier>`
+pour un autre dossier, `--qt <dossier>` quand CMake ne trouve pas Qt, ou `--help`. Sous
+Windows, ou depuis une copie des sources, installez avec CMake :
+
+```sh
+cmake -S ardoise -B ardoise/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build ardoise/build
+cmake --install ardoise/build --prefix "$HOME/.local"
+```
+
+Trouvez-la ensuite comme tout paquet CMake :
 
 ```cmake
 find_package(Ardoise 0.1 CONFIG REQUIRED)
 target_link_libraries(my-app PRIVATE Ardoise::Widgets)
 ```
 
-Configurez votre application avec `-DCMAKE_PREFIX_PATH="$HOME/.local/ardoise"`. Le préfixe
-peut être déplacé ; Qt doit rester trouvable. Les paquets sont compatibles au sein d'une
-même version mineure.
+CMake trouve `~/.local` quand `~/.local/bin` est dans le `PATH` ; sinon, configurez votre
+application avec `-DCMAKE_PREFIX_PATH="$HOME/.local"`. Le préfixe peut être déplacé ; Qt
+doit rester trouvable. Les paquets sont compatibles au sein d'une même version mineure.
+Réinstallez après une mise à jour de Qt et, sous Windows, utilisez le même type de build
+que votre application.
+
+Avec CMake 3.24 ou plus récent, `FetchContent` peut préférer un paquet installé et ne
+télécharger la version que s'il n'en trouve pas :
+
+```cmake
+FetchContent_Declare(Ardoise
+    GIT_REPOSITORY https://github.com/jstmichel/ardoise.git
+    GIT_TAG v0.1.0
+    FIND_PACKAGE_ARGS 0.1 CONFIG)
+FetchContent_MakeAvailable(Ardoise)
+```
 
 Ardoise est une bibliothèque statique : elle n'embarque pas Qt, et votre application
 déploie Qt comme d'habitude (`windeployqt`, `macdeployqt`, paquets de la distribution).

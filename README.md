@@ -91,22 +91,45 @@ Embedded this way, Ardoise builds only the library: no examples, tests or instal
 
 ### Installed package
 
-Install Ardoise once, then find it like any CMake package:
+On Linux and macOS, one command downloads the latest release, checks it against the
+release's `SHA256SUMS`, builds it and installs it under `~/.local`:
 
 ```sh
-cmake -S ardoise -B ardoise/build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build ardoise/build
-cmake --install ardoise/build --prefix "$HOME/.local/ardoise"
+curl -fsSL https://github.com/jstmichel/ardoise/releases/latest/download/get-ardoise.sh | sh
 ```
+
+Add `-s -- --version v0.1.0` after `sh` for a given release, `--prefix <dir>` for another
+folder, `--qt <dir>` when CMake does not find Qt, or `--help`. On Windows, or from a
+checkout, install with CMake:
+
+```sh
+cmake -S ardoise -B ardoise/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build ardoise/build
+cmake --install ardoise/build --prefix "$HOME/.local"
+```
+
+Then find it like any CMake package:
 
 ```cmake
 find_package(Ardoise 0.1 CONFIG REQUIRED)
 target_link_libraries(my-app PRIVATE Ardoise::Widgets)
 ```
 
-Configure your application with `-DCMAKE_PREFIX_PATH="$HOME/.local/ardoise"`. The prefix
-can be moved; Qt must stay discoverable. Packages are compatible within the same minor
-version.
+CMake finds `~/.local` when `~/.local/bin` is in `PATH`; otherwise configure your
+application with `-DCMAKE_PREFIX_PATH="$HOME/.local"`. The prefix can be moved; Qt must
+stay discoverable. Packages are compatible within the same minor version. Install again
+after a Qt update, and on Windows match the build type of your application.
+
+With CMake 3.24 or newer, `FetchContent` can prefer an installed package and download
+the release only when none is found:
+
+```cmake
+FetchContent_Declare(Ardoise
+    GIT_REPOSITORY https://github.com/jstmichel/ardoise.git
+    GIT_TAG v0.1.0
+    FIND_PACKAGE_ARGS 0.1 CONFIG)
+FetchContent_MakeAvailable(Ardoise)
+```
 
 Ardoise is a static library: it does not bundle Qt, and your application deploys Qt as
 usual (`windeployqt`, `macdeployqt`, distribution packages).

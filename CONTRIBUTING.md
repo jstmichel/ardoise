@@ -174,6 +174,8 @@ Qt), macOS and Windows (Qt 6.8) for each push to `main` and each pull request.
 To release, set the new version in `project()` of `CMakeLists.txt`, add
 `docs/release-notes/<version>.md`, merge, then push a `v<version>` tag.
 `.github/workflows/release.yml` checks that the tag matches the project version,
-builds and tests the tagged source, and attaches the source archive and its
-`SHA256SUMS` to a draft release, which the maintainer reviews and publishes.
-Consumers pin that tag in `FetchContent`.
+builds and tests the tagged source, and attaches the source archive,
+`scripts/get-ardoise.sh` and their `SHA256SUMS` to a draft release, which the
+maintainer reviews and publishes. Consumers pin that tag in `FetchContent`;
+`get-ardoise.sh` installs the latest published release. The `ardoise-get-ardoise`
+test runs the installer against a fake release with a stub `cmake`.
