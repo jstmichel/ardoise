@@ -53,7 +53,7 @@ jobs:
 
       - name: Install Ninja (macOS, Windows)
         if: runner.os != 'Linux'
-        uses: seanmiddleditch/gha-setup-ninja@v5
+        uses: seanmiddleditch/gha-setup-ninja@v6
 
       - name: Set up MSVC (Windows)
         if: runner.os == 'Windows'
